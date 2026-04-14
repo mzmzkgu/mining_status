@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⛏️ Mining Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080c0f; --surf:#0d1318; --surf2:#111920; --bdr:#1e3040;
+  --ac:#00d4ff; --ac2:#f7931a; --ac3:#4cff91; --red:#ff4444; --yl:#ffe066;
+  --tx:#c8dde8; --txd:#4a6a7a; --txb:#e8f4fa;
+  --glow:0 0 20px rgba(0,212,255,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:'Rajdhani',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px;position:relative;z-index:1}
+
+/* ── HEADER ─────────────────────────────── */
+header{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 0 24px;border-bottom:1px solid var(--bdr);margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-ico{width:44px;height:44px;background:linear-gradient(135deg,var(--ac),#0055cc);
+  border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;box-shadow:var(--glow)}
+.logo-txt{font-family:'Orbitron',monospace;font-size:19px;font-weight:900;
+  color:var(--ac);letter-spacing:2px;text-shadow:var(--glow)}
+.logo-sub{font-size:10px;color:var(--txd);letter-spacing:3px;font-family:'Share Tech Mono',monospace}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--ac3);letter-spacing:2px;padding:5px 12px;
+  border:1px solid rgba(76,255,145,.3);border-radius:20px;background:rgba(76,255,145,.05)}
+.livdot{width:6px;height:6px;border-radius:50%;background:var(--ac3);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* ── BUTTONS ─────────────────────────────── */
+.btn{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  letter-spacing:1.5px;padding:9px 16px;border:none;border-radius:6px;
+  cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap}
+.btn-p{background:linear-gradient(135deg,var(--ac),#0088cc);color:#000;box-shadow:var(--glow)}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(0,212,255,.5)}
+.btn-d{background:rgba(255,68,68,.1);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.btn-d:hover{background:rgba(255,68,68,.2)}
+.btn-g{background:rgba(76,255,145,.08);color:var(--ac3);border:1px solid rgba(76,255,145,.3)}
+.btn-g:hover{background:rgba(76,255,145,.15)}
+.btn-o{background:rgba(255,224,102,.08);color:var(--yl);border:1px solid rgba(255,224,102,.3)}
+.btn-o:hover{background:rgba(255,224,102,.15)}
+.btn-sm{padding:5px 11px;font-size:9px}
+.btn-ref{background:none;border:1px solid var(--bdr);color:var(--txd);cursor:pointer;
+  font-size:10px;padding:5px 12px;border-radius:6px;font-family:'Share Tech Mono',monospace;
+  transition:all .2s;display:flex;align-items:center;gap:5px}
+.btn-ref:hover{border-color:var(--ac);color:var(--ac)}
+.btn-ref.spin span{display:inline-block;animation:spinr .8s linear infinite}
+@keyframes spinr{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* ── ADD FORM ────────────────────────────── */
+.add-form{background:var(--surf);border:1px solid var(--bdr);border-radius:13px;
+  padding:22px 24px;margin-bottom:24px;position:relative;overflow:hidden}
+.add-form::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--ac),transparent)}
+.form-ttl{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  color:var(--ac);letter-spacing:2px;margin-bottom:16px}
+.fgrid{display:grid;grid-template-columns:130px 150px 1fr 150px auto;gap:10px;align-items:end}
+@media(max-width:768px){.fgrid{grid-template-columns:1fr 1fr}.fgrid>*:last-child{grid-column:1/-1}}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd);
+  letter-spacing:2px;text-transform:uppercase}
+.fi,.fs{background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;
+  padding:9px 12px;color:var(--txb);font-family:'Share Tech Mono',monospace;
+  font-size:12px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.fi:focus,.fs:focus{border-color:var(--ac);box-shadow:0 0 0 2px rgba(0,212,255,.1)}
+.fs option{background:var(--surf2)}
+
+/* ── CONNECTION STATUS ───────────────────── */
+.conn-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;
+  border-radius:8px;margin-bottom:16px;font-family:'Share Tech Mono',monospace;font-size:11px}
+.conn-ok{background:rgba(76,255,145,.08);border:1px solid rgba(76,255,145,.25);color:var(--ac3)}
+.conn-err{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.25);color:var(--red)}
+.conn-chk{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--ac)}
+
+/* ── SUMMARY ─────────────────────────────── */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px;margin-bottom:24px}
+.sum-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;
+  padding:17px;position:relative;overflow:hidden;transition:transform .2s}
+.sum-card:hover{transform:translateY(-2px)}
+.sum-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--ac),transparent);opacity:.5}
+.sl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.sv{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--ac)}
+.su{font-size:10px;color:var(--txd);font-family:'Share Tech Mono',monospace;margin-left:3px}
+
+/* ── CARDS ───────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:18px}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;
+  overflow:hidden;transition:transform .2s,box-shadow .2s;
+  animation:fadein .4s ease both}
+@keyframes fadein{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(0,0,0,.4)}
+
+.c-hd{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--bdr)}
+.cinfo{display:flex;align-items:center;gap:11px}
+.cico{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:16px;font-weight:bold;flex-shrink:0}
+.ico-btc{background:linear-gradient(135deg,#f7931a,#e8780c);color:#fff;box-shadow:0 0 12px rgba(247,147,26,.4)}
+.ico-vrsc{background:linear-gradient(135deg,#3dc0d4,#1a8a9a);color:#fff;box-shadow:0 0 12px rgba(61,192,212,.4)}
+.ico-xmr{background:linear-gradient(135deg,#ff6600,#cc4400);color:#fff;box-shadow:0 0 12px rgba(255,102,0,.4)}
+.ico-ltc{background:linear-gradient(135deg,#bfbbbb,#8a8a8a);color:#fff}
+.ico-doge{background:linear-gradient(135deg,#c2a633,#9a821a);color:#fff}
+.ico-c{background:linear-gradient(135deg,#8844ee,#5522cc);color:#fff}
+.cname{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--txb)}
+.cpool{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txd);margin-top:2px}
+.cacts{display:flex;align-items:center;gap:7px}
+.sbdg{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  padding:3px 9px;border-radius:12px;display:flex;align-items:center;gap:4px}
+.s-ok{background:rgba(76,255,145,.1);color:var(--ac3);border:1px solid rgba(76,255,145,.3)}
+.s-ld{background:rgba(0,212,255,.1);color:var(--ac);border:1px solid rgba(0,212,255,.3)}
+.s-er{background:rgba(255,68,68,.1);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.s-mn{background:rgba(255,224,102,.1);color:var(--yl);border:1px solid rgba(255,224,102,.3)}
+.sdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.s-ok .sdot,.s-ld .sdot{animation:pulse 2s infinite}
+
+.c-body{padding:18px}
+.wall{display:flex;align-items:center;gap:8px;background:var(--surf2);
+  border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;margin-bottom:13px}
+.wt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txd);
+  flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cpbtn{background:none;border:none;color:var(--txd);cursor:pointer;font-size:11px;
+  padding:2px 5px;border-radius:4px;transition:color .2s}
+.cpbtn:hover{color:var(--ac)}
+
+/* 해시레이트 박스 */
+.hrbox{background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;
+  padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.hl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.hv{font-family:'Orbitron',monospace;font-size:23px;font-weight:700}
+.hs{font-size:11px;color:var(--txd);margin-top:2px}
+.hr-r{text-align:right}
+.hr-r .hl{text-align:right}
+
+/* 통계 그리드 */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.si{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px}
+.sil{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--txd);
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.siv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--txb)}
+.cg{color:var(--ac3)!important}.co{color:var(--ac2)!important}
+.cb{color:var(--ac)!important}.cr{color:var(--red)!important}.cy{color:var(--yl)!important}
+
+.c-ft{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;border-top:1px solid var(--bdr)}
+.upd{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)}
+.age-warn{color:var(--yl)!important}
+.age-old{color:var(--red)!important}
+
+/* 에러/로딩 */
+.errbox{text-align:center;padding:26px 14px}
+.errico{font-size:30px;margin-bottom:8px}
+.errmsg{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txd);line-height:1.8}
+.skel{background:linear-gradient(90deg,var(--surf2) 25%,rgba(255,255,255,.05) 50%,var(--surf2) 75%);
+  background-size:200% 100%;animation:shim 1.5s infinite;border-radius:4px}
+@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* 섹션 타이틀 */
+.sec{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--txd);
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* 빈 상태 */
+.empty{text-align:center;padding:80px 20px;color:var(--txd)}
+.ei{font-size:52px;opacity:.2;margin-bottom:14px}
+.et{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:2px;margin-bottom:8px}
+.es{font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8}
+
+/* 토스트 */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surf2);
+  border:1px solid var(--bdr);border-radius:10px;padding:12px 18px;
+  font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--ac3);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:2000;
+  transform:translateY(100px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.err{color:var(--red);border-color:rgba(255,68,68,.3)}
+
+/* 모달 */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadein .2s ease}
+.modal{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;
+  padding:28px;width:100%;max-width:560px;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-ttl{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  color:var(--ac);letter-spacing:2px;margin-bottom:20px}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;
+  color:var(--txd);cursor:pointer;font-size:18px;transition:color .2s}
+.modal-close:hover{color:var(--red)}
+textarea.fi{resize:vertical;min-height:200px;font-size:11px;line-height:1.6}
+
+/* 수동 입력 */
+.mnote{background:rgba(255,224,102,.05);border:1px solid rgba(255,224,102,.2);
+  border-radius:8px;padding:11px;margin-bottom:12px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--yl);
+  letter-spacing:1px;line-height:1.7}
+a.plink{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd);
+  text-decoration:none;border:1px solid var(--bdr);padding:4px 10px;
+  border-radius:6px;transition:all .2s}
+a.plink:hover{color:var(--ac);border-color:var(--ac)}
+
+/* 캐시 나이 표시 */
+.cache-info{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd);
+  text-align:center;padding:4px;opacity:.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-ico">⛏️</div>
+    <div>
+      <div class="logo-txt">MINING DASH</div>
+      <div class="logo-sub">Raspberry Pi Backend</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="live-badge"><div class="livdot"></div>LIVE · 30MIN CACHE</div>
+    <button class="btn btn-p btn-sm" onclick="refreshAll()">⟳ ALL</button>
+    <button class="btn btn-o btn-sm" onclick="openOptions()">⚙ OPTIONS</button>
+  </div>
+</header>
+
+<!-- 연결 상태 표시 -->
+<div id="connBar" class="conn-bar conn-chk">
+  <span>🔌</span> <span id="connMsg">백엔드 서버 연결 확인 중...</span>
+</div>
+
+<!-- ADD FORM -->
+<div class="add-form">
+  <div class="form-ttl">＋ ADD MINING ACCOUNT</div>
+  <div class="fgrid">
+    <div class="fg">
+      <label class="fl">COIN</label>
+      <select class="fs" id="sc" onchange="onCoinChange()">
+        <option value="BTC">₿ BTC</option>
+        <option value="VRSC">◈ VRSC</option>
+        <option value="XMR">Ӿ XMR</option>
+        <option value="LTC">Ł LTC</option>
+        <option value="DOGE">Ð DOGE</option>
+        <option value="CUSTOM">✦ CUSTOM</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">POOL</label>
+      <select class="fs" id="sp" onchange="onPoolChange()">
+        <option value="binance">Binance Pool</option>
+        <option value="ckpool">ckpool Solo</option>
+        <option value="luckpool">LuckPool</option>
+        <option value="dxpool">DxPool</option>
+        <option value="nanopool">Nanopool</option>
+        <option value="custom">Custom URL</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl" id="laddr">WALLET ADDRESS</label>
+      <input class="fi" id="iaddr" type="text" placeholder="지갑 주소 / 워커 이름 입력...">
+    </div>
+    <div class="fg">
+      <label class="fl">LABEL (선택)</label>
+      <input class="fi" id="ilabel" type="text" placeholder="RIG-01, Home PC...">
+    </div>
+    <div class="fg">
+      <label class="fl">&nbsp;</label>
+      <button class="btn btn-p" onclick="addAccount()">ADD</button>
+    </div>
+  </div>
+  <div id="rcustom" style="display:none;margin-top:10px">
+    <div class="fg">
+      <label class="fl">CUSTOM API URL — {address} 자리에 주소 자동 치환</label>
+      <input class="fi" id="icurl" type="text"
+        placeholder="https://pool.example.com/api/miner/{address}" style="width:100%">
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div id="ssec" style="display:none">
+  <div class="sec">OVERVIEW</div>
+  <div class="sum-grid" id="sgrid"></div>
+</div>
+
+<!-- CARDS -->
+<div class="sec" id="msec" style="display:none">ACTIVE MINERS</div>
+<div class="cards" id="cgrid"></div>
+
+<!-- EMPTY -->
+<div class="empty" id="eempty">
+  <div class="ei">⛏️</div>
+  <div class="et">NO MINERS REGISTERED</div>
+  <div class="es">위 폼에서 채굴 계정을 추가하세요<br>
+    백엔드: <code style="color:var(--ac)">https://kgu3405.tplinkdns.com/api/mining/</code>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<!-- OPTIONS 모달 -->
+<div id="optModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="closeOptions()">✕</button>
+    <div class="modal-ttl">⚙ OPTIONS</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <!-- 서버 URL 설정 -->
+      <div class="fg">
+        <label class="fl">백엔드 서버 URL</label>
+        <div style="display:flex;gap:8px">
+          <input class="fi" id="iserver" type="text"
+            placeholder="https://kgu3405.tplinkdns.com">
+          <button class="btn btn-p btn-sm" onclick="saveServerUrl()" style="white-space:nowrap">저장</button>
+        </div>
+      </div>
+
+      <hr style="border-color:var(--bdr)">
+
+      <!-- 백업/복원 -->
+      <div>
+        <div class="fl" style="margin-bottom:10px">📦 BACKUP / RESTORE</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-g btn-sm" onclick="doBackup()">⬇ JSON 백업 다운로드</button>
+          <button class="btn btn-o btn-sm" onclick="document.getElementById('fRestore').click()">⬆ JSON 복원</button>
+          <input type="file" id="fRestore" accept=".json" style="display:none" onchange="doRestore(this)">
+        </div>
+      </div>
+
+      <hr style="border-color:var(--bdr)">
+
+      <!-- 수동 갱신 -->
+      <div>
+        <div class="fl" style="margin-bottom:10px">🔄 CACHE CONTROL</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" onclick="refreshAll();closeOptions()">⟳ 전체 강제 갱신</button>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--txd);margin-top:8px">
+          캐시 TTL: 30분 (서버 cron 30분 주기 자동 갱신)
+        </div>
+      </div>
+
+      <hr style="border-color:var(--bdr)">
+
+      <!-- 위험 구역 -->
+      <div>
+        <div class="fl" style="color:var(--red);margin-bottom:10px">⚠ DANGER ZONE</div>
+        <button class="btn btn-d btn-sm" onclick="clearAll()">🗑 전체 계정 삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Binance 수동 입력 모달 -->
+<div id="manualModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('manualModal').style.display='none'">✕</button>
+    <div class="modal-ttl">📝 BINANCE POOL 수동 입력</div>
+    <div class="mnote">
+      Binance Pool은 API 키 인증이 필요해서 자동 조회가 안 돼.<br>
+      앱에서 확인한 수치를 직접 입력하면 대시보드에 반영돼.
+    </div>
+    <input type="hidden" id="mAccId">
+    <div class="sg" style="margin-bottom:14px">
+      <div class="si">
+        <div class="sil">HASHRATE (TH/s)</div>
+        <input type="number" step="0.01" class="fi" id="mHr" placeholder="2.81" style="margin-top:4px;padding:6px 10px">
+      </div>
+      <div class="si">
+        <div class="sil">WORKERS</div>
+        <input type="number" class="fi" id="mW" placeholder="1" style="margin-top:4px;padding:6px 10px">
+      </div>
+      <div class="si">
+        <div class="sil">EST INCOME (BTC/day)</div>
+        <input type="number" step="0.00000001" class="fi" id="mInc" placeholder="0.00000046" style="margin-top:4px;padding:6px 10px">
+      </div>
+      <div class="si">
+        <div class="sil">BALANCE (BTC)</div>
+        <input type="number" step="0.00000001" class="fi" id="mBal" placeholder="0.0" style="margin-top:4px;padding:6px 10px">
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="saveManual()" style="width:100%">저장</button>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   CONFIG
+================================================================ */
+const DEFAULT_SERVER = 'https://kgu3405.tplinkdns.com';
+let SERVER = localStorage.getItem('mining_server') || DEFAULT_SERVER;
+const API = () => `${SERVER}/api/mining`;
+
+// 메모리 캐시 (서버에서 받아온 데이터)
+let accountList = [];    // 계정 목록
+let statsMap = {};       // { id: { stats, error, fetched_at } }
+
+const PNAMES = {binance:'Binance Pool',ckpool:'ckpool Solo',luckpool:'LuckPool',
+  dxpool:'DxPool',nanopool:'Nanopool',custom:'Custom'};
+const POOLS = {BTC:['binance','ckpool','custom'],VRSC:['luckpool','custom'],
+  XMR:['dxpool','nanopool','custom'],LTC:['binance','custom'],DOGE:['binance','custom'],CUSTOM:['custom']};
+
+/* ================================================================
+   INIT
+================================================================ */
+document.getElementById('iserver').value = SERVER;
+checkConnection();
+loadAccounts();
+
+/* ================================================================
+   CONNECTION CHECK
+================================================================ */
+async function checkConnection() {
+  const bar = document.getElementById('connBar');
+  const msg = document.getElementById('connMsg');
+  bar.className = 'conn-bar conn-chk';
+  msg.textContent = `${SERVER}/api/mining/health 연결 확인 중...`;
+  try {
+    const r = await fetch(`${API()}/health`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    bar.className = 'conn-bar conn-ok';
+    msg.textContent = `✓ 백엔드 연결됨 — ${d.accounts}개 계정, 서버시간: ${new Date(d.time).toLocaleTimeString('ko-KR')}`;
+  } catch(e) {
+    bar.className = 'conn-bar conn-err';
+    msg.textContent = `✗ 백엔드 연결 실패 (${e.message}) — 서버 주소를 확인해줘`;
+  }
+}
+
+/* ================================================================
+   SERVER URL 설정
+================================================================ */
+function saveServerUrl() {
+  const v = document.getElementById('iserver').value.trim().replace(/\/+$/,'');
+  if (!v) return;
+  SERVER = v;
+  localStorage.setItem('mining_server', v);
+  toast('✓ 서버 URL 저장됨');
+  checkConnection();
+  loadAccounts();
+}
+
+/* ================================================================
+   ACCOUNTS LOAD
+================================================================ */
+async function loadAccounts() {
+  try {
+    const r = await fetch(`${API()}/accounts`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    accountList = d.accounts || [];
+    renderAll();
+    loadStats();
+  } catch(e) {
+    console.warn('계정 로드 실패:', e);
+    renderAll();
+  }
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch(`${API()}/stats`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    for (const item of d.accounts || []) {
+      statsMap[item.id] = { stats: item.stats, error: item.error, fetched_at: item.fetched_at, cache_age: item.cache_age };
+    }
+    renderAll();
+  } catch(e) {
+    console.warn('통계 로드 실패:', e);
+  }
+}
+
+/* ================================================================
+   FORM
+================================================================ */
+function onCoinChange() {
+  const c = document.getElementById('sc').value;
+  const ps = document.getElementById('sp');
+  const opts = POOLS[c] || ['custom'];
+  ps.innerHTML = opts.map(p=>`<option value="${p}">${PNAMES[p]}</option>`).join('');
+  onPoolChange();
+}
+function onPoolChange() {
+  const p = document.getElementById('sp').value;
+  document.getElementById('rcustom').style.display = p === 'custom' ? 'block' : 'none';
+  document.getElementById('laddr').textContent = p === 'ckpool' ? 'BTC ADDRESS / WORKER' : 'WALLET ADDRESS';
+}
+
+async function addAccount() {
+  const coin = document.getElementById('sc').value;
+  const pool = document.getElementById('sp').value;
+  const addr = document.getElementById('iaddr').value.trim();
+  const label = document.getElementById('ilabel').value.trim();
+  const curl = document.getElementById('icurl').value.trim();
+  if (!addr) { toast('⚠ 지갑 주소를 입력해!', true); return; }
+  if (pool === 'custom' && !curl) { toast('⚠ Custom API URL을 입력해!', true); return; }
+
+  const acc = {
+    id: Date.now().toString(),
+    coin, pool, address: addr,
+    label: label || `${coin} #${accountList.length + 1}`,
+    custom_url: curl || null,
+    added_at: Date.now() / 1000,
+  };
+
+  try {
+    const r = await fetch(`${API()}/accounts`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(acc),
+    });
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || `HTTP ${r.status}`);
+    }
+    const d = await r.json();
+    accountList.push(d.account);
+    statsMap[acc.id] = { stats: null, error: null, fetched_at: null };
+    renderAll();
+    document.getElementById('iaddr').value = '';
+    document.getElementById('ilabel').value = '';
+    toast(`✅ ${coin} 계정 추가됨! 데이터 가져오는 중...`);
+    // 잠시 후 stats 갱신
+    setTimeout(() => loadStats(), 3000);
+  } catch(e) {
+    toast(`✗ 추가 실패: ${e.message}`, true);
+  }
+}
+
+async function removeAcc(id) {
+  if (!confirm('이 채굴 계정을 삭제할까요?')) return;
+  try {
+    const r = await fetch(`${API()}/accounts/${id}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    accountList = accountList.filter(a => a.id !== id);
+    delete statsMap[id];
+    document.getElementById(`cd_${id}`)?.remove();
+    renderAll();
+    toast('🗑 삭제됨');
+  } catch(e) {
+    toast(`✗ 삭제 실패: ${e.message}`, true);
+  }
+}
+
+/* ================================================================
+   REFRESH
+================================================================ */
+async function refreshAll() {
+  try {
+    toast('🔄 전체 갱신 요청...');
+    const r = await fetch(`${API()}/refresh`, { method: 'POST' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    await loadStats();
+    toast('✅ 전체 갱신 완료!');
+  } catch(e) {
+    toast(`✗ 갱신 실패: ${e.message}`, true);
+  }
+}
+
+async function refreshOne(id) {
+  const btn = document.getElementById(`rb_${id}`);
+  if (btn) btn.classList.add('spin');
+  try {
+    const r = await fetch(`${API()}/refresh/${id}`, { method: 'POST' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    statsMap[id] = { stats: d.stats, error: d.error, fetched_at: d.fetched_at };
+    const acc = accountList.find(a => a.id === id);
+    if (acc) renderCard(acc);
+    renderSummary();
+    toast(d.error ? `⚠ 갱신됨 (에러: ${d.error})` : '✅ 갱신 완료!');
+  } catch(e) {
+    toast(`✗ 갱신 실패: ${e.message}`, true);
+  }
+  if (btn) btn.classList.remove('spin');
+}
+
+/* ================================================================
+   RENDER
+================================================================ */
+function renderAll() {
+  const cg = document.getElementById('cgrid');
+  const ee = document.getElementById('eempty');
+  const ss = document.getElementById('ssec');
+  const ms = document.getElementById('msec');
+
+  if (accountList.length === 0) {
+    ee.style.display = 'block'; ss.style.display = 'none';
+    ms.style.display = 'none'; cg.innerHTML = ''; return;
+  }
+  ee.style.display = 'none'; ss.style.display = 'block'; ms.style.display = 'flex';
+
+  accountList.forEach(acc => renderCard(acc));
+  // 없어진 카드 제거
+  const ids = new Set(accountList.map(a => a.id));
+  cg.querySelectorAll('[id^="cd_"]').forEach(el => {
+    if (!ids.has(el.id.replace('cd_', ''))) el.remove();
+  });
+  renderSummary();
+}
+
+function renderCard(acc) {
+  const cg = document.getElementById('cgrid');
+  let card = document.getElementById(`cd_${acc.id}`);
+  if (!card) {
+    card = document.createElement('div');
+    card.className = 'card'; card.id = `cd_${acc.id}`;
+    cg.appendChild(card);
+  }
+
+  const cached = statsMap[acc.id] || {};
+  const stats = cached.stats;
+  const err = cached.error;
+  const age = cached.cache_age; // seconds
+
+  let status = 'loading';
+  if (stats?._manual) status = 'manual';
+  else if (stats && !err) status = 'active';
+  else if (err && !stats) status = 'error';
+  else if (err && stats) status = 'stale';
+  else if (cached.fetched_at) status = 'active';
+
+  const badges = {
+    active:  `<div class="sbdg s-ok"><div class="sdot"></div>ACTIVE</div>`,
+    loading: `<div class="sbdg s-ld"><div class="sdot"></div>LOADING</div>`,
+    error:   `<div class="sbdg s-er"><div class="sdot"></div>ERROR</div>`,
+    manual:  `<div class="sbdg s-mn"><div class="sdot"></div>MANUAL</div>`,
+    stale:   `<div class="sbdg s-er"><div class="sdot"></div>STALE</div>`,
+  };
+
+  const pl = {
+    ckpool: `https://solostats.ckpool.org/users/${acc.address}`,
+    luckpool: `https://luckpool.net/verus/miner/${acc.address}`,
+    dxpool: `https://www.dxpool.com`,
+    nanopool: `https://nanopool.org/account/${acc.address}`,
+    binance: `https://pool.binance.com`,
+  }[acc.pool];
+
+  const icls = {BTC:'ico-btc',VRSC:'ico-vrsc',XMR:'ico-xmr',LTC:'ico-ltc',DOGE:'ico-doge'}[acc.coin]||'ico-c';
+  const iico = {BTC:'₿',VRSC:'◈',XMR:'Ӿ',LTC:'Ł',DOGE:'Ð',CUSTOM:'✦'}[acc.coin]||'⛏';
+
+  let body = '';
+  if (status === 'loading') {
+    body = `<div class="hrbox"><div style="width:100%"><div class="hl">HASHRATE</div>
+      <div class="skel" style="width:140px;height:26px;margin-top:5px"></div></div></div>
+      <div class="sg">${[1,2,3,4].map(()=>`<div class="si"><div class="skel" style="height:36px"></div></div>`).join('')}</div>`;
+  } else if (status === 'manual' || acc.pool === 'binance') {
+    body = buildManualView(acc, stats);
+  } else if ((status === 'error' || status === 'stale') && !stats) {
+    body = `<div class="errbox"><div class="errico">⚠️</div>
+      <div class="errmsg">${err}<br><br>
+      <span style="font-size:9px;opacity:.7">30분마다 자동 갱신 또는 REFRESH 버튼을 눌러봐</span>
+      </div></div>`;
+  } else if (stats) {
+    body = buildStatsView(acc, stats, status);
+  }
+
+  // 캐시 나이 표시
+  let ageStr = '미조회';
+  let ageCls = '';
+  if (cached.fetched_at) {
+    const sec = Math.floor(Date.now()/1000 - cached.fetched_at);
+    if (sec < 300) { ageStr = `${sec}s ago`; }
+    else if (sec < 3600) { ageStr = `${Math.floor(sec/60)}m ago`; }
+    else { ageStr = `${Math.floor(sec/3600)}h ago`; ageCls = sec > 7200 ? 'age-old' : 'age-warn'; }
+  }
+
+  card.innerHTML = `
+    <div class="c-hd">
+      <div class="cinfo">
+        <div class="cico ${icls}">${iico}</div>
+        <div>
+          <div class="cname">${acc.label}</div>
+          <div class="cpool">${PNAMES[acc.pool]||acc.pool} / ${acc.coin}</div>
+        </div>
+      </div>
+      <div class="cacts">
+        ${badges[status]||''}
+        ${acc.pool === 'binance' ? `<button class="btn btn-o btn-sm" onclick="openManual('${acc.id}')">✏</button>` : ''}
+        <button class="btn btn-d btn-sm" onclick="removeAcc('${acc.id}')">✕</button>
+      </div>
+    </div>
+    <div class="c-body">
+      <div class="wall">
+        <span style="font-size:11px">💳</span>
+        <span class="wt" title="${acc.address}">${shortAddr(acc.address)}</span>
+        <button class="cpbtn" onclick="cp('${acc.address}')">📋</button>
+      </div>
+      ${body}
+    </div>
+    <div class="c-ft">
+      <span class="upd ${ageCls}">⏱ ${ageStr}</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${pl ? `<a class="plink" href="${pl}" target="_blank">🔗 POOL</a>` : ''}
+        <button class="btn-ref" id="rb_${acc.id}" onclick="refreshOne('${acc.id}')">
+          <span>⟳</span> REFRESH
+        </button>
+      </div>
+    </div>`;
+}
+
+function buildStatsView(acc, s, status) {
+  const hc = (status === 'active') ? 'var(--ac3)' : 'var(--red)';
+
+  // 해시레이트 표시 (raw H/s → 포맷)
+  const hrNow = s.hashrate_now   || s.hashrate_5m || 0;
+  const hrAvg = s.hashrate_avg   || s.hashrate_1h || 0;
+  const hr1d  = s.hashrate_1d   || 0;
+  const hr7d  = s.hashrate_7d   || 0;
+
+  return `
+    <div class="hrbox">
+      <div>
+        <div class="hl">CURRENT HASHRATE</div>
+        <div class="hv" style="color:${hc}">${fh(hrNow)}</div>
+        ${hrAvg ? `<div class="hs">avg: ${fh(hrAvg)}</div>` : ''}
+      </div>
+      <div class="hr-r">
+        ${hr1d ? `<div class="hl">24H AVG</div><div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--tx)">${fh(hr1d)}</div>` : ''}
+        ${hr7d ? `<div class="hl" style="margin-top:5px">7D AVG</div><div style="font-family:'Orbitron',monospace;font-size:12px;color:var(--txd)">${fh(hr7d)}</div>` : ''}
+      </div>
+    </div>
+    <div class="sg">
+      <div class="si">
+        <div class="sil">WORKERS</div>
+        <div class="siv cb">${s.workers ?? '—'}</div>
+      </div>
+      <div class="si">
+        <div class="sil">SHARES (VALID)</div>
+        <div class="siv">${fn(s.shares_valid ?? s.shares ?? 0)}</div>
+      </div>
+      <div class="si">
+        <div class="sil">BALANCE</div>
+        <div class="siv co">${pf(s.balance, 6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div>
+      </div>
+      <div class="si">
+        <div class="sil">LAST SHARE</div>
+        <div class="siv" style="font-size:10px">${ta(s.last_share_ts)}</div>
+      </div>
+      ${s.pending != null ? `<div class="si">
+        <div class="sil">PENDING</div>
+        <div class="siv">${pf(s.pending, 6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.pending_unit||''}</span></div>
+      </div>` : ''}
+      ${s.best_share ? `<div class="si">
+        <div class="sil">BEST SHARE</div>
+        <div class="siv cg">${fn(s.best_share)}</div>
+      </div>` : ''}
+    </div>
+    ${status === 'stale' ? `<div class="cache-info">⚠ 캐시 데이터 (현재 연결 실패)</div>` : ''}`;
+}
+
+function buildManualView(acc, s) {
+  if (!s || !s._manual) {
+    return `<div class="mnote">📝 Binance Pool은 API 인증이 필요해서 수동 입력 모드야.<br>
+      ✏ 버튼을 눌러서 데이터를 입력해줘.</div>`;
+  }
+  return `
+    <div class="hrbox">
+      <div>
+        <div class="hl">HASHRATE</div>
+        <div class="hv co">${s.hashrate_ths ? s.hashrate_ths + ' TH/s' : '—'}</div>
+        <div class="hs">${s.workers ? s.workers + ' workers' : ''}</div>
+      </div>
+      <div class="hr-r">
+        <div class="hl">DAILY EST.</div>
+        <div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--ac2)">${s.income_daily ?? '—'} BTC</div>
+        ${s.balance ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd);margin-top:3px">bal: ${s.balance} BTC</div>` : ''}
+      </div>
+    </div>
+    <div class="mnote" style="margin:0">📝 MANUAL MODE — 수동 입력 데이터</div>`;
+}
+
+function renderSummary() {
+  const g = document.getElementById('sgrid');
+  const coins = [...new Set(accountList.map(a => a.coin))];
+  const ok = accountList.filter(a => {
+    const c = statsMap[a.id];
+    return c && c.stats && !c.error;
+  }).length;
+  g.innerHTML = `
+    <div class="sum-card"><div class="sl">TOTAL ACCOUNTS</div><div class="sv">${accountList.length}<span class="su">miners</span></div></div>
+    <div class="sum-card"><div class="sl">ACTIVE / TOTAL</div><div class="sv">${ok}<span class="su">/ ${accountList.length}</span></div></div>
+    <div class="sum-card"><div class="sl">COINS MINING</div><div class="sv" style="font-size:14px;padding-top:4px">${coins.join(' · ')||'—'}</div></div>
+    <div class="sum-card"><div class="sl">LAST SYNC</div><div class="sv" style="font-size:14px;padding-top:4px">${new Date().toLocaleTimeString('ko-KR')}</div></div>`;
+}
+
+/* ================================================================
+   BINANCE MANUAL INPUT
+================================================================ */
+function openManual(id) {
+  const acc = accountList.find(a => a.id === id);
+  if (!acc) return;
+  const s = statsMap[id]?.stats || {};
+  document.getElementById('mAccId').value = id;
+  document.getElementById('mHr').value = s.hashrate_ths || '';
+  document.getElementById('mW').value  = s.workers || '';
+  document.getElementById('mInc').value = s.income_daily || '';
+  document.getElementById('mBal').value = s.balance || '';
+  document.getElementById('manualModal').style.display = 'flex';
+}
+
+async function saveManual() {
+  const id = document.getElementById('mAccId').value;
+  const payload = {
+    hashrate_ths: parseFloat(document.getElementById('mHr').value) || null,
+    workers:      parseInt(document.getElementById('mW').value) || null,
+    income_daily: parseFloat(document.getElementById('mInc').value) || null,
+    balance:      parseFloat(document.getElementById('mBal').value) || null,
+  };
+  try {
+    const r = await fetch(`${API()}/manual/${id}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    statsMap[id] = { stats: d.stats, error: null, fetched_at: Date.now()/1000 };
+    const acc = accountList.find(a => a.id === id);
+    if (acc) renderCard(acc);
+    document.getElementById('manualModal').style.display = 'none';
+    toast('✅ 저장됨!');
+  } catch(e) {
+    toast(`✗ 저장 실패: ${e.message}`, true);
+  }
+}
+
+/* ================================================================
+   OPTIONS / BACKUP / RESTORE
+================================================================ */
+function openOptions() { document.getElementById('optModal').style.display = 'flex'; }
+function closeOptions() { document.getElementById('optModal').style.display = 'none'; }
+
+async function doBackup() {
+  try {
+    const r = await fetch(`${API()}/backup`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    const blob = new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mining_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('⬇ 백업 파일 다운로드됨!');
+  } catch(e) {
+    toast(`✗ 백업 실패: ${e.message}`, true);
+  }
+}
+
+function doRestore(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm(`${data.accounts?.length ?? 0}개 계정을 복원할까요? 현재 데이터는 덮어써져.`)) return;
+      const r = await fetch(`${API()}/restore`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data),
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      toast('✅ 복원 완료!');
+      await loadAccounts();
+      closeOptions();
+    } catch(e) {
+      toast(`✗ 복원 실패: ${e.message}`, true);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+async function clearAll() {
+  if (!confirm('모든 채굴 계정을 삭제할까요? 이 작업은 되돌릴 수 없어.')) return;
+  if (!confirm('정말로 전부 삭제할까요?')) return;
+  for (const acc of [...accountList]) {
+    try {
+      await fetch(`${API()}/accounts/${acc.id}`, { method: 'DELETE' });
+    } catch(e) {}
+  }
+  accountList = []; statsMap = {};
+  renderAll();
+  closeOptions();
+  toast('🗑 전체 삭제됨');
+}
+
+/* ================================================================
+   UTIL
+================================================================ */
+function fh(h) {
+  if (!h || isNaN(h)) return '0 H/s';
+  h = parseFloat(h);
+  if (h >= 1e15) return (h/1e15).toFixed(2)+' PH/s';
+  if (h >= 1e12) return (h/1e12).toFixed(2)+' TH/s';
+  if (h >= 1e9)  return (h/1e9).toFixed(2)+' GH/s';
+  if (h >= 1e6)  return (h/1e6).toFixed(3)+' MH/s';
+  if (h >= 1e3)  return (h/1e3).toFixed(2)+' KH/s';
+  return h.toFixed(0)+' H/s';
+}
+function fn(n) {
+  n = parseFloat(n);
+  if (isNaN(n)) return '—';
+  if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(0);
+}
+function pf(v, d) { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(d); }
+function ta(ts) {
+  if (!ts) return 'N/A';
+  const diff = Date.now() - (ts > 1e12 ? ts : ts * 1000);
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m/60);
+  if (h < 24) return `${h}h ${m%60}m ago`;
+  return `${Math.floor(h/24)}d ${h%24}h ago`;
+}
+function shortAddr(a) {
+  if (!a || a.length <= 16) return a;
+  return a.slice(0,8)+'...'+a.slice(-6);
+}
+function cp(t) { navigator.clipboard.writeText(t).then(() => toast('📋 복사됨!')); }
+function toast(msg, isErr=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// 모달 배경 클릭으로 닫기
+document.getElementById('optModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('optModal')) closeOptions();
+});
+document.getElementById('manualModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('manualModal'))
+    document.getElementById('manualModal').style.display = 'none';
+});
+
+// 5분마다 통계 자동 갱신 (서버 캐시 체크)
+setInterval(() => loadStats(), 5 * 60 * 1000);
+
+// 폼 초기화
+onCoinChange();
+</script>
+</body>
+</html>
