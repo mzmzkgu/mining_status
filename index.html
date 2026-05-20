@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⛏️ Mining Dashboard</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23795548%22/><text y=%22.9em%22 font-size=%2280%22 x=%2210%22>⛏️</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -147,9 +146,10 @@ header{display:flex;align-items:center;justify-content:space-between;
 .ico-btc{background:linear-gradient(135deg,#f7931a,#e8780c);color:#fff;box-shadow:0 0 10px rgba(247,147,26,.4)}
 .ico-vrsc{background:linear-gradient(135deg,#3dc0d4,#1a8a9a);color:#fff;box-shadow:0 0 10px rgba(61,192,212,.4)}
 .ico-xmr{background:linear-gradient(135deg,#ff6600,#cc4400);color:#fff;box-shadow:0 0 10px rgba(255,102,0,.4)}
+.ico-dgb{background:linear-gradient(135deg,#0066cc,#0044aa);color:#fff;box-shadow:0 0 10px rgba(0,102,204,.4)}
+.ico-duco{background:linear-gradient(135deg,#e8c44a,#c49a1a);color:#000;box-shadow:0 0 10px rgba(232,196,74,.4)}
 .ico-ltc{background:linear-gradient(135deg,#bfbbbb,#8a8a8a);color:#fff}
 .ico-doge{background:linear-gradient(135deg,#c2a633,#9a821a);color:#fff}
-.ico-duco{background:linear-gradient(135deg,#e8c44a,#c49a1a);color:#000;box-shadow:0 0 10px rgba(232,196,74,.4)}
 .ico-c{background:linear-gradient(135deg,#8844ee,#5522cc);color:#fff}
 .ctext{min-width:0;flex:1;overflow:hidden}
 .cname{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--txb);
@@ -313,6 +313,7 @@ hr.mdiv{border:none;border-top:1px solid var(--bdr);margin:14px 0}
           <option value="BTC">₿ BTC</option>
           <option value="VRSC">◈ VRSC</option>
           <option value="XMR">Ӿ XMR</option>
+          <option value="DGB">◈ DGB</option>
           <option value="DUCO">ᕲ DUCO</option>
           <option value="LTC">Ł LTC</option>
           <option value="DOGE">Ð DOGE</option>
@@ -551,14 +552,16 @@ let statsMap    = {};
 // ④ ckpool과 NerdMiners 분리
 const PNAMES = {
   binance:'Binance Pool', ckpool:'ckpool Solo', nerdminers:'NerdMiners',
-  luckpool:'LuckPool', dxpool:'DxPool', nanopool:'Nanopool', duinocoin:'Duino-Coin', custom:'Custom'
+  luckpool:'LuckPool', dxpool:'DxPool', nanopool:'Nanopool',
+  duinocoin:'Duino-Coin', viabtc:'ViaBTC', solominer:'Solominer', custom:'Custom'
 };
 const POOLS = {
-  BTC:    ['binance','ckpool','nerdminers','custom'],
+  BTC:    ['binance','ckpool','nerdminers','viabtc','custom'],
   VRSC:   ['luckpool','custom'],
   XMR:    ['dxpool','nanopool','custom'],
+  DGB:    ['solominer','custom'],
   DUCO:   ['duinocoin'],
-  LTC:    ['binance','custom'],
+  LTC:    ['binance','viabtc','custom'],
   DOGE:   ['binance','custom'],
   CUSTOM: ['custom']
 };
@@ -571,6 +574,8 @@ const POOL_HINTS = {
   binance:    '🟡 Binance Pool: 수동 입력 모드야. 등록 후 ✏ 버튼으로 데이터를 직접 입력해줘.',
   luckpool:   '🍀 LuckPool: VRSC 지갑 주소를 입력해줘.',
   duinocoin:  '🪙 Duino-Coin: 계정 username을 입력해줘 (지갑 주소 아님!).\n예) my_duco_username',
+  viabtc:     '🔷 ViaBTC: API Key를 입력해줘.\nviabtc.com → 계정관리 → API 관리 → API Key 생성\n※ IP 화이트리스트에 라즈베리파이 IP 등록 필요!',
+  solominer:  '💎 Solominer (DGB): DGB 지갑 주소를 입력해줘.\n예) DApSoyMBJjQ4GPDNrs5FFmuEnZ1SHikt3o',
 };
 
 /* ================================================================
@@ -695,7 +700,9 @@ function onPoolChange() {
   const addrLabel = {
     ckpool:'BTC ADDRESS', nerdminers:'BTC ADDRESS',
     dxpool:'OBSERVER TOKEN or URL', binance:'BTC 지갑 주소 (선택)',
-    duinocoin:'DUINO-COIN USERNAME'
+    duinocoin:'DUINO-COIN USERNAME',
+    viabtc:'VIABTC API KEY',
+    solominer:'DGB WALLET ADDRESS',
   }[p] || 'WALLET ADDRESS';
   document.getElementById('laddr').textContent = addrLabel;
   // 힌트 표시
@@ -819,17 +826,23 @@ function renderCard(acc) {
   };
 
   const pl = {
-    ckpool:`https://solostats.ckpool.org/users/${acc.address}`,
+    ckpool:`https://pool.nerdminers.org/users/${acc.address}`,
     nerdminers:`https://pool.nerdminers.org/users/${acc.address}`,
     luckpool:`https://luckpool.net/verus/miner/${acc.address}`,
     dxpool:`https://www.dxpool.com`,
     nanopool:`https://nanopool.org/account/${acc.address}`,
     binance:`https://pool.binance.com`,
     duinocoin:`https://server.duinocoin.com/v2/users/${acc.address}`,
+    viabtc:`https://www.viabtc.com/`,
+    solominer:`https://digibyte.solominer.net/#/app/${acc.address}`,
   }[acc.pool];
 
-  const icls = {BTC:'ico-btc',VRSC:'ico-vrsc',XMR:'ico-xmr',LTC:'ico-ltc',DOGE:'ico-doge',DUCO:'ico-duco'}[acc.coin]||'ico-c';
-  const iico = {BTC:'₿',VRSC:'◈',XMR:'Ӿ',LTC:'Ł',DOGE:'Ð',DUCO:'ᕲ',CUSTOM:'✦'}[acc.coin]||'⛏';
+  const icls = {BTC:'ico-btc',VRSC:'ico-vrsc',XMR:'ico-xmr',DGB:'ico-dgb',DUCO:'ico-duco',LTC:'ico-ltc',DOGE:'ico-doge'}[acc.coin]||'ico-c';
+  const iico = {BTC:'₿',VRSC:'◈',XMR:'Ӿ',DGB:'Ɗ',DUCO:'ᕲ',LTC:'Ł',DOGE:'Ð',CUSTOM:'✦'}[acc.coin]||'⛏';
+  // viabtc는 address가 API Key이므로 마스킹
+  const displayAddr = acc.pool==='viabtc'
+    ? acc.address.slice(0,6)+'••••••'+acc.address.slice(-4)
+    : acc.address;
 
   let body = '';
   if (status==='loading') {
@@ -848,10 +861,10 @@ function renderCard(acc) {
         <div class="cico ${icls}">${iico}</div>
         <div class="ctext"><div class="cname" title="${acc.label}">${acc.label}</div><div class="cpool">${PNAMES[acc.pool]||acc.pool} / ${acc.coin}</div></div>
       </div>
-      <div class="cacts">${badges[status]||''}${(acc.pool==='binance'||acc.pool==='dxpool')&&status!=='active'?`<button class="btn btn-o btn-sm" onclick="openManual('${acc.id}')">✏</button>`:acc.pool==='binance'?`<button class="btn btn-o btn-sm" onclick="openManual('${acc.id}')">✏</button>`:''}<button class="btn btn-d btn-sm" onclick="removeAcc('${acc.id}')">✕</button></div>
+      <div class="cacts">${badges[status]||''}${acc.pool==='binance'?`<button class="btn btn-o btn-sm" onclick="openManual('${acc.id}')">✏</button>`:''}<button class="btn btn-d btn-sm" onclick="removeAcc('${acc.id}')">✕</button></div>
     </div>
     <div class="c-body">
-      <div class="wall"><span style="font-size:11px;flex-shrink:0">💳</span><span class="wt" title="${acc.address}">${shortAddr(acc.address)}</span><button class="cpbtn" onclick="cp('${acc.address}')">📋</button></div>
+      <div class="wall"><span style="font-size:11px;flex-shrink:0">💳</span><span class="wt" title="${acc.address}">${shortAddr(displayAddr)}</span><button class="cpbtn" onclick="cp('${acc.address}')">📋</button></div>
       ${body}
     </div>
     <div class="c-ft"><span class="upd" id="age_${acc.id}">⏱ —</span><div class="c-ft-r">${pl?`<a class="plink" href="${pl}" target="_blank">🔗 POOL</a>`:''}<button class="btn-ref" id="rb_${acc.id}" onclick="refreshOne('${acc.id}')"><span>⟳</span> REFRESH</button></div></div>`;
@@ -864,43 +877,56 @@ function buildStatsView(acc, s, status) {
   const hr1d  = s.hashrate_1d||0;
   const hr7d  = s.hashrate_7d||0;
 
-  // DUCO 마이너 목록 렌더링
-  let minerRows = '';
-  if (acc.coin === 'DUCO' && Array.isArray(s.miners) && s.miners.length > 0) {
-    minerRows = `
-    <div style="margin-top:10px">
+  // DGB Solominer 워커 목록
+  let workerRows = '';
+  if (acc.pool==='solominer' && Array.isArray(s.workers_detail) && s.workers_detail.length>0) {
+    workerRows=`<div style="margin-top:10px">
+      <div class="sil" style="margin-bottom:6px">⚙ WORKERS (${s.workers_detail.length})</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${s.workers_detail.map(w=>{
+          const ls = w.last_seen ? new Date(w.last_seen) : null;
+          const age = ls ? Math.floor((Date.now()-ls)/1000) : null;
+          const online = age!=null && age < 300;
+          return `<div style="background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
+            <div><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txb)">${w.name||'?'} <span style="color:${online?'var(--ac3)':'var(--red)'}">●</span></div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">best diff: ${pf(w.best_diff,4)}</div></div>
+            <div style="text-align:right"><div style="font-family:'Orbitron',monospace;font-size:11px;color:var(--ac3)">${fh(w.hashrate)}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">${w.last_seen?ta(new Date(w.last_seen).getTime()/1000):'—'}</div></div>
+          </div>`;}).join('')}
+      </div></div>`;
+  }
+
+  // DUCO 마이너 목록
+  if (acc.coin==='DUCO' && Array.isArray(s.miners) && s.miners.length>0) {
+    workerRows=`<div style="margin-top:10px">
       <div class="sil" style="margin-bottom:6px">⚙ MINERS (${s.miners.length})</div>
       <div style="display:flex;flex-direction:column;gap:4px">
         ${s.miners.map(m=>`
-          <div style="background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
-            <div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txb)">${m.name||'?'}</div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">${m.algorithm||''} · ${m.software||''}</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-family:'Orbitron',monospace;font-size:11px;color:var(--ac3)">${fh(m.hashrate)}</div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">✓${m.accepted} ✗${m.rejected}</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>`;
+        <div style="background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
+          <div><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txb)">${m.name||'?'}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">${m.algorithm||''} · ${m.software||''}</div></div>
+          <div style="text-align:right"><div style="font-family:'Orbitron',monospace;font-size:11px;color:var(--ac3)">${fh(m.hashrate)}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">✓${m.accepted} ✗${m.rejected}</div></div>
+        </div>`).join('')}
+      </div></div>`;
   }
 
   return `
     <div class="hrbox"><div><div class="hl">CURRENT HASHRATE</div><div class="hv" style="color:${hc}">${fh(hrNow)}</div>${hrAvg?`<div class="hs">avg: ${fh(hrAvg)}</div>`:''}</div>
     <div class="hr-r">${hr1d?`<div class="hl">24H</div><div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--tx)">${fh(hr1d)}</div>`:''} ${hr7d?`<div class="hl" style="margin-top:4px">7D</div><div style="font-family:'Orbitron',monospace;font-size:12px;color:var(--txd)">${fh(hr7d)}</div>`:''}</div></div>
     <div class="sg">
-      <div class="si"><div class="sil">WORKERS</div><div class="siv cb">${s.workers??'—'}</div></div>
+      <div class="si"><div class="sil">WORKERS</div><div class="siv cb">${s.workers??'—'}${s.workers_inactive>0?`<span style="font-size:9px;color:var(--red);margin-left:4px">(+${s.workers_inactive} off)</span>`:''}</div></div>
       <div class="si"><div class="sil">SHARES</div><div class="siv">${fn(s.shares_valid??s.shares??0)}</div></div>
-      <div class="si"><div class="sil">BALANCE</div><div class="siv co">${pf(s.balance,4)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>
+      <div class="si"><div class="sil">BALANCE</div><div class="siv co">${pf(s.balance,6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>
       <div class="si"><div class="sil">LAST SHARE</div><div class="siv live-timer" id="ls_${acc.id}" style="font-size:11px">${ta(s.last_share_ts)}</div></div>
-      ${s.pending!=null?`<div class="si"><div class="sil">CURRENT PROFIT</div><div class="siv cg">${pf(s.pending,6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.pending_unit||''}</span></div></div>`:''}
+      ${s.best_diff?`<div class="si"><div class="sil">BEST DIFF</div><div class="siv cg">${pf(s.best_diff,4)}</div></div>`:''}
+      ${s.pending!=null?`<div class="si"><div class="sil">TODAY PROFIT</div><div class="siv cg">${pf(s.pending,8)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.pending_unit||''}</span></div></div>`:''}
       ${s.income_yesterday!=null?`<div class="si"><div class="sil">YESTERDAY</div><div class="siv">${pf(s.income_yesterday,6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>`:''}
       ${s.best_share?`<div class="si"><div class="sil">BEST SHARE</div><div class="siv cg">${fn(s.best_share)}</div></div>`:''}
       ${s.total_paid?`<div class="si"><div class="sil">TOTAL PAID</div><div class="siv">${pf(s.total_paid,6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>`:''}
       ${s.shares_rejected>0?`<div class="si"><div class="sil">REJECTED</div><div class="siv" style="color:var(--red)">${fn(s.shares_rejected)}</div></div>`:''}
     </div>
-    ${minerRows}
+    ${workerRows}
     ${status==='stale'?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red);text-align:center;padding:4px">⚠ 캐시 데이터</div>`:''}`;
 }
 
