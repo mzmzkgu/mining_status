@@ -313,7 +313,7 @@ hr.mdiv{border:none;border-top:1px solid var(--bdr);margin:14px 0}
           <option value="BTC">₿ BTC</option>
           <option value="VRSC">◈ VRSC</option>
           <option value="XMR">Ӿ XMR</option>
-          <option value="DGB">◈ DGB</option>
+          <option value="DGB">Ɗ DGB</option>
           <option value="DUCO">ᕲ DUCO</option>
           <option value="LTC">Ł LTC</option>
           <option value="DOGE">Ð DOGE</option>
@@ -839,7 +839,6 @@ function renderCard(acc) {
 
   const icls = {BTC:'ico-btc',VRSC:'ico-vrsc',XMR:'ico-xmr',DGB:'ico-dgb',DUCO:'ico-duco',LTC:'ico-ltc',DOGE:'ico-doge'}[acc.coin]||'ico-c';
   const iico = {BTC:'₿',VRSC:'◈',XMR:'Ӿ',DGB:'Ɗ',DUCO:'ᕲ',LTC:'Ł',DOGE:'Ð',CUSTOM:'✦'}[acc.coin]||'⛏';
-  // viabtc는 address가 API Key이므로 마스킹
   const displayAddr = acc.pool==='viabtc'
     ? acc.address.slice(0,6)+'••••••'+acc.address.slice(-4)
     : acc.address;
@@ -878,15 +877,13 @@ function buildStatsView(acc, s, status) {
   const hr7d  = s.hashrate_7d||0;
 
   // DGB Solominer 워커 목록
-  let workerRows = '';
+  let extraRows = '';
   if (acc.pool==='solominer' && Array.isArray(s.workers_detail) && s.workers_detail.length>0) {
-    workerRows=`<div style="margin-top:10px">
+    extraRows=`<div style="margin-top:10px">
       <div class="sil" style="margin-bottom:6px">⚙ WORKERS (${s.workers_detail.length})</div>
       <div style="display:flex;flex-direction:column;gap:4px">
         ${s.workers_detail.map(w=>{
-          const ls = w.last_seen ? new Date(w.last_seen) : null;
-          const age = ls ? Math.floor((Date.now()-ls)/1000) : null;
-          const online = age!=null && age < 300;
+          const online = w.last_seen && (Date.now()-new Date(w.last_seen).getTime())<300000;
           return `<div style="background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
             <div><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--txb)">${w.name||'?'} <span style="color:${online?'var(--ac3)':'var(--red)'}">●</span></div>
             <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--txd)">best diff: ${pf(w.best_diff,4)}</div></div>
@@ -898,7 +895,7 @@ function buildStatsView(acc, s, status) {
 
   // DUCO 마이너 목록
   if (acc.coin==='DUCO' && Array.isArray(s.miners) && s.miners.length>0) {
-    workerRows=`<div style="margin-top:10px">
+    extraRows=`<div style="margin-top:10px">
       <div class="sil" style="margin-bottom:6px">⚙ MINERS (${s.miners.length})</div>
       <div style="display:flex;flex-direction:column;gap:4px">
         ${s.miners.map(m=>`
@@ -917,7 +914,7 @@ function buildStatsView(acc, s, status) {
     <div class="sg">
       <div class="si"><div class="sil">WORKERS</div><div class="siv cb">${s.workers??'—'}${s.workers_inactive>0?`<span style="font-size:9px;color:var(--red);margin-left:4px">(+${s.workers_inactive} off)</span>`:''}</div></div>
       <div class="si"><div class="sil">SHARES</div><div class="siv">${fn(s.shares_valid??s.shares??0)}</div></div>
-      <div class="si"><div class="sil">BALANCE</div><div class="siv co">${pf(s.balance,6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>
+      <div class="si"><div class="sil">BALANCE</div><div class="siv co">${pf(s.balance,4)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>
       <div class="si"><div class="sil">LAST SHARE</div><div class="siv live-timer" id="ls_${acc.id}" style="font-size:11px">${ta(s.last_share_ts)}</div></div>
       ${s.best_diff?`<div class="si"><div class="sil">BEST DIFF</div><div class="siv cg">${pf(s.best_diff,4)}</div></div>`:''}
       ${s.pending!=null?`<div class="si"><div class="sil">TODAY PROFIT</div><div class="siv cg">${pf(s.pending,8)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.pending_unit||''}</span></div></div>`:''}
@@ -926,7 +923,7 @@ function buildStatsView(acc, s, status) {
       ${s.total_paid?`<div class="si"><div class="sil">TOTAL PAID</div><div class="siv">${pf(s.total_paid,6)}<span style="font-size:8px;color:var(--txd);margin-left:3px">${s.balance_unit||''}</span></div></div>`:''}
       ${s.shares_rejected>0?`<div class="si"><div class="sil">REJECTED</div><div class="siv" style="color:var(--red)">${fn(s.shares_rejected)}</div></div>`:''}
     </div>
-    ${workerRows}
+    ${extraRows}
     ${status==='stale'?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red);text-align:center;padding:4px">⚠ 캐시 데이터</div>`:''}`;
 }
 
